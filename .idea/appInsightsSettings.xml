@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.fitfync" />
+                  <option name="mobileSdkAppId" value="1:1053769290676:android:3a51bd852f7b75b41f98e1" />
+                  <option name="projectId" value="fitsync-11d46" />
+                  <option name="projectNumber" value="1053769290676" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
