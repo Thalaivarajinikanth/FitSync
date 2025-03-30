@@ -65,7 +65,7 @@ fun FitnessAppHome() {
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             when (selectedIndex) {
-                0 -> HomeScreen()
+                0 -> HomeScreen(onNavigate = { selectedIndex = it })
                 1 -> WorkoutScreen()
                 2 -> MealLoggerScreen()
                 3 -> SleepTrackerScreen()
@@ -74,10 +74,11 @@ fun FitnessAppHome() {
     }
 }
 
+
 // -------- Screens --------
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(onNavigate: (Int) -> Unit) {
     val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
     val userName = auth.currentUser?.email ?: "User"
@@ -159,9 +160,10 @@ fun HomeScreen() {
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            FeatureCard("🏋️ Workout Tracker")
-            FeatureCard("🥗 Meal Logger")
-            FeatureCard("🛌 Sleep Tracker")
+            //  Feature Cards Now Navigate to Bottom Screens!
+            FeatureCard(" Workout Tracker") { onNavigate(1) }
+            FeatureCard(" Meal Logger") { onNavigate(2) }
+            FeatureCard(" Sleep Tracker") { onNavigate(3) }
 
             Spacer(modifier = Modifier.height(32.dp))
 
@@ -185,6 +187,7 @@ fun HomeScreen() {
         }
     }
 }
+
 
 @Composable
 fun WorkoutScreen() {
@@ -397,11 +400,12 @@ fun StatCard(title: String, value: String) {
 }
 
 @Composable
-fun FeatureCard(title: String) {
+fun FeatureCard(title: String, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp),
+            .padding(vertical = 6.dp)
+            .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -415,6 +419,7 @@ fun FeatureCard(title: String) {
         }
     }
 }
+
 
 // -------- Bottom Nav Items --------
 
