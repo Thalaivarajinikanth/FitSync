@@ -31,7 +31,6 @@ class HomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Check if user is signed in
         val user = FirebaseAuth.getInstance().currentUser
         if (user == null) {
             startActivity(Intent(this, SigninActivity::class.java))
@@ -48,7 +47,7 @@ class HomeActivity : ComponentActivity() {
 
 @Composable
 fun FitnessAppHome() {
-    var selectedIndex by remember { mutableStateOf(0) }
+    var selectedIndex by remember { mutableIntStateOf(0) }
 
     Scaffold(
         bottomBar = {
@@ -83,6 +82,9 @@ fun HomeScreen() {
     val auth = FirebaseAuth.getInstance()
     val userName = auth.currentUser?.email ?: "User"
 
+    var steps by remember { mutableIntStateOf(0) }
+    val calories = remember(steps) { steps * 0.04 }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
             painter = painterResource(id = R.drawable.background),
@@ -111,17 +113,48 @@ fun HomeScreen() {
             )
 
             Spacer(modifier = Modifier.height(16.dp))
+
             Text("Today's Stats", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color.Black)
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                StatCard(title = "Steps", value = "4,526")
-                StatCard(title = "Calories", value = "1,230")
-                StatCard(title = "Workouts", value = "2")
+                StatCard("Steps", steps.toString())
+                StatCard("Calories", String.format("%.0f", calories))
+                StatCard("Workouts", "2")
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Button(
+                    onClick = { if (steps >= 100) steps -= 100 },
+                    shape = RoundedCornerShape(50),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                ) {
+                    Text("-100")
+                }
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Text("Adjust Steps", fontWeight = FontWeight.Medium, fontSize = 16.sp)
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Button(
+                    onClick = { steps += 100 },
+                    shape = RoundedCornerShape(50),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
+                ) {
+                    Text("+100", color = Color.White)
+                }
             }
 
             Spacer(modifier = Modifier.height(28.dp))
@@ -238,7 +271,7 @@ fun FeatureCard(title: String) {
 
 enum class BottomNavItem(val title: String, val icon: ImageVector) {
     Home("Home", Icons.Default.Home),
-    Workout("Workout", icon = Icons.Default.FitnessCenter),
-    Meal("Meal", icon = Icons.Default.Restaurant),
-    Sleep("Sleep", icon = Icons.Default.Bedtime)
+    Workout("Workout", Icons.Default.FitnessCenter),
+    Meal("Meal", Icons.Default.Restaurant),
+    Sleep("Sleep", Icons.Default.Bedtime)
 }
