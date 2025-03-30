@@ -44,6 +44,8 @@ dependencies {
 
     implementation(libs.material3) //
     implementation(libs.androidx.material.icons.extended)
+    implementation(libs.play.services.location)
+
 
 
     // Core Android & Lifecycle

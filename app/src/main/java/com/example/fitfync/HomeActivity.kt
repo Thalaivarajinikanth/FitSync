@@ -26,6 +26,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fitfync.ui.theme.FitFyncTheme
 import com.google.firebase.auth.FirebaseAuth
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import com.google.android.gms.location.LocationServices
+
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
+
+import androidx.activity.compose.rememberLauncherForActivityResult
+
+
+
 
 class HomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -191,10 +203,43 @@ fun HomeScreen(onNavigate: (Int) -> Unit) {
 
 @Composable
 fun WorkoutScreen() {
+    val context = LocalContext.current
+    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+
     var workoutType by remember { mutableStateOf("") }
     var duration by remember { mutableStateOf("") }
     var caloriesBurned by remember { mutableStateOf("") }
     var message by remember { mutableStateOf<String?>(null) }
+    var locationText by remember { mutableStateOf<String?>(null) }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { granted ->
+            if (granted) {
+                // ✅ Check permission explicitly before accessing location
+                if (ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                        location?.let {
+                            locationText = "📍 Location: ${it.latitude}, ${it.longitude}"
+                        } ?: run {
+                            locationText = "Location not available"
+                        }
+                    }
+                }
+            } else {
+                locationText = "Permission denied"
+            }
+        }
+    )
+
+    // Ask permission on first composition
+    LaunchedEffect(Unit) {
+        launcher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+    }
 
     Column(
         modifier = Modifier
@@ -246,12 +291,20 @@ fun WorkoutScreen() {
             Text("Log Workout")
         }
 
+        Spacer(modifier = Modifier.height(16.dp))
+
+        locationText?.let {
+            Text(it, color = Color.DarkGray)
+        }
+
         message?.let {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             Text(it, color = Color.Black)
         }
     }
 }
+
+
 
 
 @Composable
