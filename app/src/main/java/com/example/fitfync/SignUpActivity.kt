@@ -1,5 +1,6 @@
 package com.example.fitfync
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -21,6 +22,7 @@ import androidx.compose.ui.text.input.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fitfync.ui.theme.FitFyncTheme
+import com.google.firebase.auth.FirebaseAuth
 
 class SignupActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,6 +38,7 @@ class SignupActivity : ComponentActivity() {
 @Composable
 fun SignUpScreen() {
     val context = LocalContext.current
+    val auth = FirebaseAuth.getInstance()
 
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -46,6 +49,7 @@ fun SignUpScreen() {
     var emailError by remember { mutableStateOf(false) }
     var passwordError by remember { mutableStateOf(false) }
     var confirmPasswordError by remember { mutableStateOf(false) }
+    var firebaseError by remember { mutableStateOf<String?>(null) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -55,7 +59,6 @@ fun SignUpScreen() {
             modifier = Modifier.fillMaxSize()
         )
 
-        // Overlay
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -82,8 +85,9 @@ fun SignUpScreen() {
                 onValueChange = {
                     name = it
                     nameError = false
+                    firebaseError = null
                 },
-                label = { Text("Name") },
+                label = { Text("Name", color = Color.Black) },
                 isError = nameError,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -96,8 +100,9 @@ fun SignUpScreen() {
                 onValueChange = {
                     email = it
                     emailError = false
+                    firebaseError = null
                 },
-                label = { Text("Email") },
+                label = { Text("Email", color = Color.Black) },
                 isError = emailError,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 modifier = Modifier.fillMaxWidth()
@@ -111,8 +116,9 @@ fun SignUpScreen() {
                 onValueChange = {
                     password = it
                     passwordError = false
+                    firebaseError = null
                 },
-                label = { Text("Password") },
+                label = { Text("Password", color = Color.Black) },
                 isError = passwordError,
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -127,13 +133,19 @@ fun SignUpScreen() {
                 onValueChange = {
                     confirmPassword = it
                     confirmPasswordError = false
+                    firebaseError = null
                 },
-                label = { Text("Confirm Password") },
+                label = { Text("Confirm Password", color = Color.Black) },
                 isError = confirmPasswordError,
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth()
             )
             if (confirmPasswordError) Text("Passwords do not match", color = Color.Red, fontSize = 12.sp)
+
+            if (firebaseError != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(firebaseError ?: "", color = Color.Red, fontSize = 12.sp)
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -145,11 +157,22 @@ fun SignUpScreen() {
                     confirmPasswordError = confirmPassword != password
 
                     if (!(nameError || emailError || passwordError || confirmPasswordError)) {
-                        Toast.makeText(context, "Account created!", Toast.LENGTH_SHORT).show()
-                        // TODO: navigate to SigninActivity or Home
+                        auth.createUserWithEmailAndPassword(email, password)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    Toast.makeText(context, "Signup successful", Toast.LENGTH_SHORT).show()
+                                    context.startActivity(Intent(context, SigninActivity::class.java))
+                                } else {
+                                    firebaseError = task.exception?.message ?: "Signup failed"
+                                }
+                            }
                     }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Black,
+                    contentColor = Color.White
+                )
             ) {
                 Text("Sign Up")
             }
@@ -157,13 +180,13 @@ fun SignUpScreen() {
             Spacer(modifier = Modifier.height(16.dp))
 
             Row {
-                Text("Already have an account?")
+                Text("Already have an account?", color = Color.Black)
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "Sign In",
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.clickable {
-                        val intent = android.content.Intent(context, SigninActivity::class.java)
+                        val intent = Intent(context, SigninActivity::class.java)
                         context.startActivity(intent)
                     }
                 )

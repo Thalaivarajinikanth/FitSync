@@ -1,5 +1,6 @@
 package com.example.fitfync
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -21,6 +22,12 @@ import androidx.compose.ui.text.input.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fitfync.ui.theme.FitFyncTheme
+import com.google.firebase.auth.FirebaseAuth
+import com.example.fitfync.HomeActivity
+import com.example.fitfync.R
+import com.example.fitfync.SignupActivity
+import androidx.compose.material3.TextFieldDefaults
+
 
 class SigninActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,16 +40,16 @@ class SigninActivity : ComponentActivity() {
     }
 }
 
-
 @Composable
 fun SignInScreen() {
     val context = LocalContext.current
+    val auth = FirebaseAuth.getInstance()
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-
     var emailError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
+    var firebaseError by remember { mutableStateOf<String?>(null) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         // Background Image
@@ -82,13 +89,24 @@ fun SignInScreen() {
                 onValueChange = {
                     email = it
                     emailError = null
+                    firebaseError = null
                 },
-                label = { Text("Email") },
+                label = { Text("Email", color = Color.Black) },
                 isError = emailError != null,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
                     imeAction = ImeAction.Next
                 ),
+                colors = TextFieldDefaults.colors(
+                    focusedTextColor = Color.Black,
+                    unfocusedTextColor = Color.Black,
+                    focusedIndicatorColor = Color.Black,
+                    unfocusedIndicatorColor = Color.Gray,
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    cursorColor = Color.Black
+                ),
+
                 modifier = Modifier.fillMaxWidth()
             )
             if (emailError != null) {
@@ -103,18 +121,33 @@ fun SignInScreen() {
                 onValueChange = {
                     password = it
                     passwordError = null
+                    firebaseError = null
                 },
-                label = { Text("Password") },
+                label = { Text("Password", color = Color.Black) },
                 isError = passwordError != null,
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
                     imeAction = ImeAction.Done
                 ),
+                colors = TextFieldDefaults.colors(
+                    focusedTextColor = Color.Black,
+                    unfocusedTextColor = Color.Black,
+                    focusedIndicatorColor = Color.Black,
+                    unfocusedIndicatorColor = Color.Gray,
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    cursorColor = Color.Black
+                ),
                 modifier = Modifier.fillMaxWidth()
             )
             if (passwordError != null) {
                 Text(passwordError ?: "", color = Color.Red, fontSize = 12.sp)
+            }
+
+            if (firebaseError != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(firebaseError ?: "", color = Color.Red, fontSize = 12.sp)
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -141,11 +174,22 @@ fun SignInScreen() {
                     }
 
                     if (valid) {
-                        Toast.makeText(context, "Logging in...", Toast.LENGTH_SHORT).show()
-                        // TODO: Navigate to next screen
+                        auth.signInWithEmailAndPassword(email, password)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    Toast.makeText(context, "Login successful", Toast.LENGTH_SHORT).show()
+                                    context.startActivity(Intent(context, HomeActivity::class.java))
+                                } else {
+                                    firebaseError = task.exception?.message ?: "Login failed"
+                                }
+                            }
                     }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Black,
+                    contentColor = Color.White
+                )
             ) {
                 Text("Sign In")
             }
@@ -154,13 +198,13 @@ fun SignInScreen() {
 
             // Sign Up Redirect
             Row {
-                Text("Don't have an account?")
+                Text("Don't have an account?", color = Color.Black)
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "Sign Up",
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.clickable {
-                        val intent = android.content.Intent(context, SignupActivity::class.java)
+                        val intent = Intent(context, SignupActivity::class.java)
                         context.startActivity(intent)
                     }
                 )
