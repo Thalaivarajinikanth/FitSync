@@ -216,7 +216,7 @@ fun WorkoutScreen() {
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { granted ->
             if (granted) {
-                // ✅ Check permission explicitly before accessing location
+                //  Check permission explicitly before accessing location
                 if (ContextCompat.checkSelfPermission(
                         context,
                         Manifest.permission.ACCESS_FINE_LOCATION
