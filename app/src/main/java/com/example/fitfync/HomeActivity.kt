@@ -188,39 +188,188 @@ fun HomeScreen() {
 
 @Composable
 fun WorkoutScreen() {
-    Box(
+    var workoutType by remember { mutableStateOf("") }
+    var duration by remember { mutableStateOf("") }
+    var caloriesBurned by remember { mutableStateOf("") }
+    var message by remember { mutableStateOf<String?>(null) }
+
+    Column(
         modifier = Modifier
             .fillMaxSize()
+            .padding(24.dp)
             .background(Color(0xFFF4F4F4)),
-        contentAlignment = Alignment.Center
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("🏋️ Workout Tracker (Coming Soon)", fontSize = 18.sp)
+        Text("🏋️ Workout Tracker", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        OutlinedTextField(
+            value = workoutType,
+            onValueChange = { workoutType = it },
+            label = { Text("Workout Type (e.g., Running)") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        OutlinedTextField(
+            value = duration,
+            onValueChange = { duration = it },
+            label = { Text("Duration (mins)") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        OutlinedTextField(
+            value = caloriesBurned,
+            onValueChange = { caloriesBurned = it },
+            label = { Text("Calories Burned") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = {
+                message = if (workoutType.isNotBlank() && duration.isNotBlank() && caloriesBurned.isNotBlank()) {
+                    "Workout Logged: $workoutType for $duration mins, $caloriesBurned kcal burned."
+                } else "Please fill in all fields."
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Log Workout")
+        }
+
+        message?.let {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(it, color = Color.Black)
+        }
     }
 }
+
 
 @Composable
 fun MealLoggerScreen() {
-    Box(
+    var mealType by remember { mutableStateOf("") }
+    var foodItem by remember { mutableStateOf("") }
+    var calories by remember { mutableStateOf("") }
+    var message by remember { mutableStateOf<String?>(null) }
+
+    Column(
         modifier = Modifier
             .fillMaxSize()
+            .padding(24.dp)
             .background(Color(0xFFF4F4F4)),
-        contentAlignment = Alignment.Center
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("🥗 Meal Logger (Coming Soon)", fontSize = 18.sp)
+        Text("🥗 Meal Logger", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        OutlinedTextField(
+            value = mealType,
+            onValueChange = { mealType = it },
+            label = { Text("Meal Type (e.g., Breakfast)") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        OutlinedTextField(
+            value = foodItem,
+            onValueChange = { foodItem = it },
+            label = { Text("Food Item") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        OutlinedTextField(
+            value = calories,
+            onValueChange = { calories = it },
+            label = { Text("Calories") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = {
+                message = if (mealType.isNotBlank() && foodItem.isNotBlank() && calories.isNotBlank()) {
+                    "Meal Logged: $mealType - $foodItem ($calories kcal)"
+                } else "Please complete all fields."
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Log Meal")
+        }
+
+        message?.let {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(it, color = Color.Black)
+        }
     }
 }
 
+
 @Composable
 fun SleepTrackerScreen() {
-    Box(
+    var hours by remember { mutableStateOf("") }
+    var quality by remember { mutableStateOf("") }
+    var message by remember { mutableStateOf<String?>(null) }
+
+    Column(
         modifier = Modifier
             .fillMaxSize()
+            .padding(24.dp)
             .background(Color(0xFFF4F4F4)),
-        contentAlignment = Alignment.Center
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("🛌 Sleep Tracker (Coming Soon)", fontSize = 18.sp)
+        Text("🛌 Sleep Tracker", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        OutlinedTextField(
+            value = hours,
+            onValueChange = { hours = it },
+            label = { Text("Hours Slept") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        OutlinedTextField(
+            value = quality,
+            onValueChange = { quality = it },
+            label = { Text("Sleep Quality (e.g., Good)") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Button(
+            onClick = {
+                message = if (hours.isNotBlank() && quality.isNotBlank()) {
+                    "Sleep Logged: $hours hours, Quality: $quality"
+                } else "Please complete all fields."
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Log Sleep")
+        }
+
+        message?.let {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(it, color = Color.Black)
+        }
     }
 }
+
 
 // -------- Components --------
 
