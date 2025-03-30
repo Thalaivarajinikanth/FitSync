@@ -42,7 +42,9 @@ android {
 
 dependencies {
 
-    implementation(libs.material3) // or higher
+    implementation(libs.material3) //
+    implementation(libs.androidx.material.icons.extended)
+
 
     // Core Android & Lifecycle
     implementation(libs.androidx.core.ktx)

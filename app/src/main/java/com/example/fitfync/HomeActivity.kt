@@ -6,14 +6,19 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -35,11 +40,42 @@ class HomeActivity : ComponentActivity() {
 
         setContent {
             FitFyncTheme {
-                HomeScreen()
+                FitnessAppHome()
             }
         }
     }
 }
+
+@Composable
+fun FitnessAppHome() {
+    var selectedIndex by remember { mutableStateOf(0) }
+
+    Scaffold(
+        bottomBar = {
+            NavigationBar {
+                BottomNavItem.entries.forEachIndexed { index, item ->
+                    NavigationBarItem(
+                        selected = selectedIndex == index,
+                        onClick = { selectedIndex = index },
+                        icon = { Icon(item.icon, contentDescription = item.title) },
+                        label = { Text(item.title) }
+                    )
+                }
+            }
+        }
+    ) { innerPadding ->
+        Box(modifier = Modifier.padding(innerPadding)) {
+            when (selectedIndex) {
+                0 -> HomeScreen()
+                1 -> WorkoutScreen()
+                2 -> MealLoggerScreen()
+                3 -> SleepTrackerScreen()
+            }
+        }
+    }
+}
+
+// -------- Screens --------
 
 @Composable
 fun HomeScreen() {
@@ -47,67 +83,113 @@ fun HomeScreen() {
     val auth = FirebaseAuth.getInstance()
     val userName = auth.currentUser?.email ?: "User"
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "Welcome, $userName 👋",
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold
+    Box(modifier = Modifier.fillMaxSize()) {
+        Image(
+            painter = painterResource(id = R.drawable.background),
+            contentDescription = "Background",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0x80FFFFFF))
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Daily Summary
-        Text("Today's Stats", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            StatCard(title = "Steps", value = "4,526")
-            StatCard(title = "Calories", value = "1,230")
-            StatCard(title = "Workouts", value = "2")
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Navigation Cards
-        FeatureCard(title = "Workout Tracker", onClick = {
-            Toast.makeText(context, "Coming Soon", Toast.LENGTH_SHORT).show()
-        })
-
-        FeatureCard(title = "Meal Logger", onClick = {
-            Toast.makeText(context, "Coming Soon", Toast.LENGTH_SHORT).show()
-        })
-
-        FeatureCard(title = "Sleep Tracker", onClick = {
-            Toast.makeText(context, "Coming Soon", Toast.LENGTH_SHORT).show()
-        })
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // Logout Button
-        Button(
-            onClick = {
-                auth.signOut()
-                Toast.makeText(context, "Logged out", Toast.LENGTH_SHORT).show()
-                context.startActivity(Intent(context, SigninActivity::class.java))
-            },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Black,
-                contentColor = Color.White
+            Text(
+                text = "Welcome, $userName 👋",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
             )
-        ) {
-            Text("Logout")
+
+            Spacer(modifier = Modifier.height(16.dp))
+            Text("Today's Stats", fontSize = 18.sp, fontWeight = FontWeight.SemiBold, color = Color.Black)
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                StatCard(title = "Steps", value = "4,526")
+                StatCard(title = "Calories", value = "1,230")
+                StatCard(title = "Workouts", value = "2")
+            }
+
+            Spacer(modifier = Modifier.height(28.dp))
+
+            FeatureCard("🏋️ Workout Tracker")
+            FeatureCard("🥗 Meal Logger")
+            FeatureCard("🛌 Sleep Tracker")
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Button(
+                onClick = {
+                    auth.signOut()
+                    Toast.makeText(context, "Logged out", Toast.LENGTH_SHORT).show()
+                    context.startActivity(Intent(context, SigninActivity::class.java))
+                },
+                shape = RoundedCornerShape(20.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Black,
+                    contentColor = Color.White
+                )
+            ) {
+                Text("Logout")
+            }
         }
     }
 }
+
+@Composable
+fun WorkoutScreen() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF4F4F4)),
+        contentAlignment = Alignment.Center
+    ) {
+        Text("🏋️ Workout Tracker (Coming Soon)", fontSize = 18.sp)
+    }
+}
+
+@Composable
+fun MealLoggerScreen() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF4F4F4)),
+        contentAlignment = Alignment.Center
+    ) {
+        Text("🥗 Meal Logger (Coming Soon)", fontSize = 18.sp)
+    }
+}
+
+@Composable
+fun SleepTrackerScreen() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF4F4F4)),
+        contentAlignment = Alignment.Center
+    ) {
+        Text("🛌 Sleep Tracker (Coming Soon)", fontSize = 18.sp)
+    }
+}
+
+// -------- Components --------
 
 @Composable
 fun StatCard(title: String, value: String) {
@@ -116,7 +198,8 @@ fun StatCard(title: String, value: String) {
             .width(100.dp)
             .height(80.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFEEEEEE))
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(6.dp)
     ) {
         Column(
             modifier = Modifier
@@ -126,27 +209,36 @@ fun StatCard(title: String, value: String) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(title, fontSize = 14.sp, color = Color.Gray)
-            Text(value, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Text(value, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.Black)
         }
     }
 }
 
 @Composable
-fun FeatureCard(title: String, onClick: () -> Unit) {
+fun FeatureCard(title: String) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .clickable { onClick() },
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFFAFAFA))
+            .padding(vertical = 6.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Box(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth()
         ) {
-            Text(text = title, fontSize = 16.sp)
+            Text(text = title, fontSize = 16.sp, color = Color.Black)
         }
     }
+}
+
+// -------- Bottom Nav Items --------
+
+enum class BottomNavItem(val title: String, val icon: ImageVector) {
+    Home("Home", Icons.Default.Home),
+    Workout("Workout", icon = Icons.Default.FitnessCenter),
+    Meal("Meal", icon = Icons.Default.Restaurant),
+    Sleep("Sleep", icon = Icons.Default.Bedtime)
 }
