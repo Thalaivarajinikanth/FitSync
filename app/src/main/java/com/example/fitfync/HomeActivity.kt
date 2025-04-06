@@ -224,7 +224,7 @@ fun WorkoutScreen() {
                 ) {
                     fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                         location?.let {
-                            locationText = "📍 Location: ${it.latitude}, ${it.longitude}"
+                            locationText = "Location: ${it.latitude}, ${it.longitude}"
                         } ?: run {
                             locationText = "Location not available"
                         }
