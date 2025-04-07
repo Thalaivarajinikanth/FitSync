@@ -36,6 +36,8 @@ import androidx.core.content.ContextCompat
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.fitfync.room.MealLog
+import com.example.fitfync.viewmodel.MealViewModel
 import com.example.fitfync.viewmodel.WorkoutViewModel
 
 
@@ -119,7 +121,7 @@ fun HomeScreen(onNavigate: (Int) -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Welcome, $userName 👋",
+                text = "Welcome, $userName",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
@@ -251,7 +253,7 @@ fun WorkoutScreen(viewModel: WorkoutViewModel = viewModel()) {
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("🏋️ Workout Tracker", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+        Text("Workout Tracker", fontSize = 22.sp, fontWeight = FontWeight.Bold)
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -313,7 +315,7 @@ fun WorkoutScreen(viewModel: WorkoutViewModel = viewModel()) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text("📋 Previous Workouts", fontWeight = FontWeight.SemiBold)
+        Text("Previous Workouts", fontWeight = FontWeight.SemiBold)
         Spacer(modifier = Modifier.height(8.dp))
 
         if (workouts.isEmpty()) {
@@ -334,11 +336,13 @@ fun WorkoutScreen(viewModel: WorkoutViewModel = viewModel()) {
 
 
 @Composable
-fun MealLoggerScreen() {
+fun MealLoggerScreen(viewModel: MealViewModel = viewModel()) {
     var mealType by remember { mutableStateOf("") }
     var foodItem by remember { mutableStateOf("") }
     var calories by remember { mutableStateOf("") }
     var message by remember { mutableStateOf<String?>(null) }
+
+    val meals by viewModel.meals.collectAsState()
 
     Column(
         modifier = Modifier
@@ -348,7 +352,7 @@ fun MealLoggerScreen() {
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("🥗 Meal Logger", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+        Text("Meal Logger", fontSize = 22.sp, fontWeight = FontWeight.Bold)
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -381,21 +385,47 @@ fun MealLoggerScreen() {
 
         Button(
             onClick = {
-                message = if (mealType.isNotBlank() && foodItem.isNotBlank() && calories.isNotBlank()) {
-                    "Meal Logged: $mealType - $foodItem ($calories kcal)"
-                } else "Please complete all fields."
+                if (mealType.isNotBlank() && foodItem.isNotBlank() && calories.isNotBlank()) {
+                    val log = MealLog(
+                        mealType = mealType,
+                        foodItem = foodItem,
+                        calories = calories
+                    )
+                    viewModel.insertMeal(log)
+
+                    mealType = ""
+                    foodItem = ""
+                    calories = ""
+                    message = "Meal Logged!"
+                } else {
+                    message = "Please complete all fields."
+                }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Log Meal")
         }
 
+        Spacer(modifier = Modifier.height(16.dp))
+
         message?.let {
-            Spacer(modifier = Modifier.height(16.dp))
             Text(it, color = Color.Black)
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+        Text("🍽️ Previous Meals", fontWeight = FontWeight.SemiBold)
+
+        Spacer(modifier = Modifier.height(8.dp))
+        if (meals.isEmpty()) {
+            Text("No meals logged yet.")
+        } else {
+            meals.forEach {
+                Text("• ${it.mealType}: ${it.foodItem} (${it.calories} kcal)", fontSize = 14.sp)
+            }
         }
     }
 }
+
 
 
 @Composable
