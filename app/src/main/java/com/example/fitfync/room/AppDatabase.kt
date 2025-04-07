@@ -9,13 +9,14 @@ import com.example.fitfync.room.MealLog
 
 
 @Database(
-    entities = [WorkoutLog::class, MealLog::class],
+    entities = [WorkoutLog::class, MealLog::class, SleepLog::class],
     version = 2, // Version bumped
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun workoutDao(): WorkoutDao
     abstract fun mealDao(): MealDao
+    abstract fun sleepDao(): SleepDao
 
 
     companion object {

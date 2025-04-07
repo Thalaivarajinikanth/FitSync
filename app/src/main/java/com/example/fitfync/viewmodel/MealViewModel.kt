@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 
 class MealViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val dao = AppDatabase.getDatabase(application).mealDao()
+    private val dao = AppDatabase.Companion.getDatabase(application).mealDao()
 
     private val _meals = MutableStateFlow<List<MealLog>>(emptyList())
     val meals: StateFlow<List<MealLog>> = _meals.asStateFlow()

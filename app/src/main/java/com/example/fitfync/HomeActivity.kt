@@ -37,7 +37,9 @@ import androidx.core.content.ContextCompat
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.fitfync.room.MealLog
+import com.example.fitfync.room.SleepLog
 import com.example.fitfync.viewmodel.MealViewModel
+import com.example.fitfync.viewmodel.SleepViewModel
 import com.example.fitfync.viewmodel.WorkoutViewModel
 
 
@@ -429,10 +431,12 @@ fun MealLoggerScreen(viewModel: MealViewModel = viewModel()) {
 
 
 @Composable
-fun SleepTrackerScreen() {
+fun SleepTrackerScreen(viewModel: SleepViewModel = viewModel()) {
     var hours by remember { mutableStateOf("") }
     var quality by remember { mutableStateOf("") }
     var message by remember { mutableStateOf<String?>(null) }
+
+    val sleepLogs by viewModel.sleeps.collectAsState()
 
     Column(
         modifier = Modifier
@@ -466,21 +470,45 @@ fun SleepTrackerScreen() {
 
         Button(
             onClick = {
-                message = if (hours.isNotBlank() && quality.isNotBlank()) {
-                    "Sleep Logged: $hours hours, Quality: $quality"
-                } else "Please complete all fields."
+                if (hours.isNotBlank() && quality.isNotBlank()) {
+                    val log = SleepLog(
+                        hours = hours,
+                        quality = quality
+                    )
+                    viewModel.insertSleep(log)
+
+                    hours = ""
+                    quality = ""
+                    message = "Sleep Logged!"
+                } else {
+                    message = "Please complete all fields."
+                }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Log Sleep")
         }
 
+        Spacer(modifier = Modifier.height(16.dp))
+
         message?.let {
-            Spacer(modifier = Modifier.height(16.dp))
             Text(it, color = Color.Black)
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+        Text(" Previous Logs", fontWeight = FontWeight.SemiBold)
+
+        Spacer(modifier = Modifier.height(8.dp))
+        if (sleepLogs.isEmpty()) {
+            Text("No logs yet.")
+        } else {
+            sleepLogs.forEach {
+                Text("• ${it.hours} hrs, Quality: ${it.quality}", fontSize = 14.sp)
+            }
         }
     }
 }
+
 
 
 // -------- Components --------
