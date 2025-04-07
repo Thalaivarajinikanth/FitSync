@@ -35,8 +35,8 @@ import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 
 import androidx.activity.compose.rememberLauncherForActivityResult
-
-
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.fitfync.viewmodel.WorkoutViewModel
 
 
 class HomeActivity : ComponentActivity() {
@@ -202,7 +202,7 @@ fun HomeScreen(onNavigate: (Int) -> Unit) {
 
 
 @Composable
-fun WorkoutScreen() {
+fun WorkoutScreen(viewModel: WorkoutViewModel = viewModel()) {
     val context = LocalContext.current
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
 
@@ -210,13 +210,15 @@ fun WorkoutScreen() {
     var duration by remember { mutableStateOf("") }
     var caloriesBurned by remember { mutableStateOf("") }
     var message by remember { mutableStateOf<String?>(null) }
-    var locationText by remember { mutableStateOf<String?>(null) }
+    var locationText by remember { mutableStateOf<String>("Unknown") }
 
+    val workouts by viewModel.workouts.collectAsState()
+
+    // Permission launcher
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { granted ->
             if (granted) {
-                //  Check permission explicitly before accessing location
                 if (ContextCompat.checkSelfPermission(
                         context,
                         Manifest.permission.ACCESS_FINE_LOCATION
@@ -224,7 +226,7 @@ fun WorkoutScreen() {
                 ) {
                     fusedLocationClient.lastLocation.addOnSuccessListener { location ->
                         location?.let {
-                            locationText = "Location: ${it.latitude}, ${it.longitude}"
+                            locationText = "${it.latitude}, ${it.longitude}"
                         } ?: run {
                             locationText = "Location not available"
                         }
@@ -236,7 +238,7 @@ fun WorkoutScreen() {
         }
     )
 
-    // Ask permission on first composition
+    // Launch permission request
     LaunchedEffect(Unit) {
         launcher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
     }
@@ -282,9 +284,21 @@ fun WorkoutScreen() {
 
         Button(
             onClick = {
-                message = if (workoutType.isNotBlank() && duration.isNotBlank() && caloriesBurned.isNotBlank()) {
-                    "Workout Logged: $workoutType for $duration mins, $caloriesBurned kcal burned."
-                } else "Please fill in all fields."
+                if (workoutType.isNotBlank() && duration.isNotBlank() && caloriesBurned.isNotBlank()) {
+                    val workoutLog = WorkoutLog(
+                        workoutType = workoutType,
+                        duration = duration,
+                        caloriesBurned = caloriesBurned,
+                        location = locationText
+                    )
+                    viewModel.insertWorkout(workoutLog)
+                    workoutType = ""
+                    duration = ""
+                    caloriesBurned = ""
+                    message = "Workout Saved!"
+                } else {
+                    message = "Please fill in all fields."
+                }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -293,16 +307,28 @@ fun WorkoutScreen() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        locationText?.let {
-            Text(it, color = Color.DarkGray)
+        message?.let {
+            Text(it, color = Color.Black)
         }
 
-        message?.let {
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(it, color = Color.Black)
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text("📋 Previous Workouts", fontWeight = FontWeight.SemiBold)
+        Spacer(modifier = Modifier.height(8.dp))
+
+        if (workouts.isEmpty()) {
+            Text("No logs yet")
+        } else {
+            workouts.forEach { workout ->
+                Text(
+                    text = "• ${workout.workoutType} - ${workout.duration} mins (${workout.caloriesBurned} kcal)",
+                    fontSize = 14.sp
+                )
+            }
         }
     }
 }
+
 
 
 
