@@ -23,11 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.fitfync.ui.theme.FitFyncTheme
 import com.google.firebase.auth.FirebaseAuth
-import com.example.fitfync.HomeActivity
-import com.example.fitfync.R
-import com.example.fitfync.SignupActivity
 import androidx.compose.material3.TextFieldDefaults
-
+import androidx.compose.ui.text.font.FontWeight
 
 class SigninActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,9 +47,36 @@ fun SignInScreen() {
     var emailError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
     var firebaseError by remember { mutableStateOf<String?>(null) }
+    var showGdprDialog by remember { mutableStateOf(true) }
+    var consentGiven by remember { mutableStateOf(false) }
+
+    // GDPR Dialog
+    if (showGdprDialog && !consentGiven) {
+        AlertDialog(
+            onDismissRequest = {},
+            title = { Text("Privacy & GDPR Consent", fontWeight = FontWeight.Bold) },
+            text = {
+                Text("We use your data to personalize your experience and keep your account secure. By proceeding, you agree to our Privacy Policy and Terms of Service.")
+            },
+            confirmButton = {
+                Button(onClick = {
+                    consentGiven = true
+                    showGdprDialog = false
+                }) {
+                    Text("I Agree")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    Toast.makeText(context, "Consent required to use the app", Toast.LENGTH_SHORT).show()
+                }) {
+                    Text("Decline")
+                }
+            }
+        )
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Background Image
         Image(
             painter = painterResource(id = R.drawable.background),
             contentDescription = "Background",
@@ -60,7 +84,6 @@ fun SignInScreen() {
             modifier = Modifier.fillMaxSize()
         )
 
-        // Overlay
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -74,7 +97,6 @@ fun SignInScreen() {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Logo
             Image(
                 painter = painterResource(id = R.drawable.fitsync_logo),
                 contentDescription = "Logo",
@@ -83,7 +105,6 @@ fun SignInScreen() {
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Email Field
             OutlinedTextField(
                 value = email,
                 onValueChange = {
@@ -106,7 +127,6 @@ fun SignInScreen() {
                     unfocusedContainerColor = Color.Transparent,
                     cursorColor = Color.Black
                 ),
-
                 modifier = Modifier.fillMaxWidth()
             )
             if (emailError != null) {
@@ -115,7 +135,6 @@ fun SignInScreen() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Password Field
             OutlinedTextField(
                 value = password,
                 onValueChange = {
@@ -152,7 +171,6 @@ fun SignInScreen() {
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Sign In Button
             Button(
                 onClick = {
                     var valid = true
@@ -173,7 +191,7 @@ fun SignInScreen() {
                         valid = false
                     }
 
-                    if (valid) {
+                    if (valid && consentGiven) {
                         auth.signInWithEmailAndPassword(email, password)
                             .addOnCompleteListener { task ->
                                 if (task.isSuccessful) {
@@ -183,6 +201,8 @@ fun SignInScreen() {
                                     firebaseError = task.exception?.message ?: "Login failed"
                                 }
                             }
+                    } else if (!consentGiven) {
+                        Toast.makeText(context, "You must accept GDPR policy to continue", Toast.LENGTH_SHORT).show()
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -196,7 +216,6 @@ fun SignInScreen() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Sign Up Redirect
             Row {
                 Text("Don't have an account?", color = Color.Black)
                 Spacer(modifier = Modifier.width(4.dp))
@@ -204,8 +223,7 @@ fun SignInScreen() {
                     text = "Sign Up",
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.clickable {
-                        val intent = Intent(context, SignupActivity::class.java)
-                        context.startActivity(intent)
+                        context.startActivity(Intent(context, SignupActivity::class.java))
                     }
                 )
             }
