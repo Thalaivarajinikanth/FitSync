@@ -206,7 +206,10 @@ fun HomeScreen(onNavigate: (Int) -> Unit) {
 
 
 @Composable
-fun WorkoutScreen(viewModel: WorkoutViewModel = viewModel()) {
+fun WorkoutScreen(
+    viewModel: WorkoutViewModel = viewModel(),
+    onBack: () -> Unit = {}  // You can pass this from the navigation handler
+) {
     val context = LocalContext.current
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
 
@@ -250,84 +253,87 @@ fun WorkoutScreen(viewModel: WorkoutViewModel = viewModel()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp)
-            .background(Color(0xFFF4F4F4)),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .background(Color(0xFFF4F4F4))
     ) {
-        Text("Workout Tracker", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+        TopBarWithBack(title = "Workout Tracker", onBack = onBack)
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        OutlinedTextField(
-            value = workoutType,
-            onValueChange = { workoutType = it },
-            label = { Text("Workout Type (e.g., Running)") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        OutlinedTextField(
-            value = duration,
-            onValueChange = { duration = it },
-            label = { Text("Duration (mins)") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        OutlinedTextField(
-            value = caloriesBurned,
-            onValueChange = { caloriesBurned = it },
-            label = { Text("Calories Burned") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Button(
-            onClick = {
-                if (workoutType.isNotBlank() && duration.isNotBlank() && caloriesBurned.isNotBlank()) {
-                    val workoutLog = WorkoutLog(
-                        workoutType = workoutType,
-                        duration = duration,
-                        caloriesBurned = caloriesBurned,
-                        location = locationText
-                    )
-                    viewModel.insertWorkout(workoutLog)
-                    workoutType = ""
-                    duration = ""
-                    caloriesBurned = ""
-                    message = "Workout Saved!"
-                } else {
-                    message = "Please fill in all fields."
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Log Workout")
-        }
+            OutlinedTextField(
+                value = workoutType,
+                onValueChange = { workoutType = it },
+                label = { Text("Workout Type (e.g., Running)") },
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-        message?.let {
-            Text(it, color = Color.Black)
-        }
+            OutlinedTextField(
+                value = duration,
+                onValueChange = { duration = it },
+                label = { Text("Duration (mins)") },
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-        Text("Previous Workouts", fontWeight = FontWeight.SemiBold)
-        Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = caloriesBurned,
+                onValueChange = { caloriesBurned = it },
+                label = { Text("Calories Burned") },
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        if (workouts.isEmpty()) {
-            Text("No logs yet")
-        } else {
-            workouts.forEach { workout ->
-                Text(
-                    text = "• ${workout.workoutType} - ${workout.duration} mins (${workout.caloriesBurned} kcal)",
-                    fontSize = 14.sp
-                )
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(
+                onClick = {
+                    if (workoutType.isNotBlank() && duration.isNotBlank() && caloriesBurned.isNotBlank()) {
+                        val workoutLog = WorkoutLog(
+                            workoutType = workoutType,
+                            duration = duration,
+                            caloriesBurned = caloriesBurned,
+                            location = locationText
+                        )
+                        viewModel.insertWorkout(workoutLog)
+                        workoutType = ""
+                        duration = ""
+                        caloriesBurned = ""
+                        message = "Workout Saved!"
+                    } else {
+                        message = "Please fill in all fields."
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Log Workout")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            message?.let {
+                Text(it, color = Color.Black)
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text("Previous Workouts", fontWeight = FontWeight.SemiBold)
+            Spacer(modifier = Modifier.height(8.dp))
+
+            if (workouts.isEmpty()) {
+                Text("No logs yet")
+            } else {
+                workouts.forEach { workout ->
+                    Text(
+                        text = "• ${workout.workoutType} - ${workout.duration} mins (${workout.caloriesBurned} kcal)",
+                        fontSize = 14.sp
+                    )
+                }
             }
         }
     }
@@ -337,8 +343,12 @@ fun WorkoutScreen(viewModel: WorkoutViewModel = viewModel()) {
 
 
 
+
 @Composable
-fun MealLoggerScreen(viewModel: MealViewModel = viewModel()) {
+fun MealLoggerScreen(
+    viewModel: MealViewModel = viewModel(),
+    onBack: () -> Unit = {}  // Pass in your back navigation lambda
+) {
     var mealType by remember { mutableStateOf("") }
     var foodItem by remember { mutableStateOf("") }
     var calories by remember { mutableStateOf("") }
@@ -349,80 +359,83 @@ fun MealLoggerScreen(viewModel: MealViewModel = viewModel()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp)
-            .background(Color(0xFFF4F4F4)),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .background(Color(0xFFF4F4F4))
     ) {
-        Text("Meal Logger", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+        TopBarWithBack(title = "Meal Logger", onBack = onBack)
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        OutlinedTextField(
-            value = mealType,
-            onValueChange = { mealType = it },
-            label = { Text("Meal Type (e.g., Breakfast)") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        OutlinedTextField(
-            value = foodItem,
-            onValueChange = { foodItem = it },
-            label = { Text("Food Item") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        OutlinedTextField(
-            value = calories,
-            onValueChange = { calories = it },
-            label = { Text("Calories") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Button(
-            onClick = {
-                if (mealType.isNotBlank() && foodItem.isNotBlank() && calories.isNotBlank()) {
-                    val log = MealLog(
-                        mealType = mealType,
-                        foodItem = foodItem,
-                        calories = calories
-                    )
-                    viewModel.insertMeal(log)
-
-                    mealType = ""
-                    foodItem = ""
-                    calories = ""
-                    message = "Meal Logged!"
-                } else {
-                    message = "Please complete all fields."
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Log Meal")
-        }
+            OutlinedTextField(
+                value = mealType,
+                onValueChange = { mealType = it },
+                label = { Text("Meal Type (e.g., Breakfast)") },
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-        message?.let {
-            Text(it, color = Color.Black)
-        }
+            OutlinedTextField(
+                value = foodItem,
+                onValueChange = { foodItem = it },
+                label = { Text("Food Item") },
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        Spacer(modifier = Modifier.height(32.dp))
-        Text("🍽️ Previous Meals", fontWeight = FontWeight.SemiBold)
+            Spacer(modifier = Modifier.height(12.dp))
 
-        Spacer(modifier = Modifier.height(8.dp))
-        if (meals.isEmpty()) {
-            Text("No meals logged yet.")
-        } else {
-            meals.forEach {
-                Text("• ${it.mealType}: ${it.foodItem} (${it.calories} kcal)", fontSize = 14.sp)
+            OutlinedTextField(
+                value = calories,
+                onValueChange = { calories = it },
+                label = { Text("Calories") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(
+                onClick = {
+                    if (mealType.isNotBlank() && foodItem.isNotBlank() && calories.isNotBlank()) {
+                        val log = MealLog(
+                            mealType = mealType,
+                            foodItem = foodItem,
+                            calories = calories
+                        )
+                        viewModel.insertMeal(log)
+
+                        mealType = ""
+                        foodItem = ""
+                        calories = ""
+                        message = "Meal Logged!"
+                    } else {
+                        message = "Please complete all fields."
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Log Meal")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            message?.let {
+                Text(it, color = Color.Black)
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+            Text("🍽️ Previous Meals", fontWeight = FontWeight.SemiBold)
+
+            Spacer(modifier = Modifier.height(8.dp))
+            if (meals.isEmpty()) {
+                Text("No meals logged yet.")
+            } else {
+                meals.forEach {
+                    Text("• ${it.mealType}: ${it.foodItem} (${it.calories} kcal)", fontSize = 14.sp)
+                }
             }
         }
     }
@@ -430,8 +443,12 @@ fun MealLoggerScreen(viewModel: MealViewModel = viewModel()) {
 
 
 
+
 @Composable
-fun SleepTrackerScreen(viewModel: SleepViewModel = viewModel()) {
+fun SleepTrackerScreen(
+    viewModel: SleepViewModel = viewModel(),
+    onBack: () -> Unit = {}
+) {
     var hours by remember { mutableStateOf("") }
     var quality by remember { mutableStateOf("") }
     var message by remember { mutableStateOf<String?>(null) }
@@ -441,73 +458,77 @@ fun SleepTrackerScreen(viewModel: SleepViewModel = viewModel()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp)
-            .background(Color(0xFFF4F4F4)),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .background(Color(0xFFF4F4F4))
     ) {
-        Text("🛌 Sleep Tracker", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+        TopBarWithBack(title = "Sleep Tracker", onBack = onBack)
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        OutlinedTextField(
-            value = hours,
-            onValueChange = { hours = it },
-            label = { Text("Hours Slept") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        OutlinedTextField(
-            value = quality,
-            onValueChange = { quality = it },
-            label = { Text("Sleep Quality (e.g., Good)") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Button(
-            onClick = {
-                if (hours.isNotBlank() && quality.isNotBlank()) {
-                    val log = SleepLog(
-                        hours = hours,
-                        quality = quality
-                    )
-                    viewModel.insertSleep(log)
-
-                    hours = ""
-                    quality = ""
-                    message = "Sleep Logged!"
-                } else {
-                    message = "Please complete all fields."
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Log Sleep")
-        }
+            OutlinedTextField(
+                value = hours,
+                onValueChange = { hours = it },
+                label = { Text("Hours Slept") },
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-        message?.let {
-            Text(it, color = Color.Black)
-        }
+            OutlinedTextField(
+                value = quality,
+                onValueChange = { quality = it },
+                label = { Text("Sleep Quality (e.g., Good)") },
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        Spacer(modifier = Modifier.height(32.dp))
-        Text(" Previous Logs", fontWeight = FontWeight.SemiBold)
+            Spacer(modifier = Modifier.height(24.dp))
 
-        Spacer(modifier = Modifier.height(8.dp))
-        if (sleepLogs.isEmpty()) {
-            Text("No logs yet.")
-        } else {
-            sleepLogs.forEach {
-                Text("• ${it.hours} hrs, Quality: ${it.quality}", fontSize = 14.sp)
+            Button(
+                onClick = {
+                    if (hours.isNotBlank() && quality.isNotBlank()) {
+                        val log = SleepLog(
+                            hours = hours,
+                            quality = quality
+                        )
+                        viewModel.insertSleep(log)
+
+                        hours = ""
+                        quality = ""
+                        message = "Sleep Logged!"
+                    } else {
+                        message = "Please complete all fields."
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Log Sleep")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            message?.let {
+                Text(it, color = Color.Black)
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+            Text("Previous Logs", fontWeight = FontWeight.SemiBold)
+
+            Spacer(modifier = Modifier.height(8.dp))
+            if (sleepLogs.isEmpty()) {
+                Text("No logs yet.")
+            } else {
+                sleepLogs.forEach {
+                    Text("• ${it.hours} hrs, Quality: ${it.quality}", fontSize = 14.sp)
+                }
             }
         }
     }
 }
+
 
 
 
@@ -566,3 +587,22 @@ enum class BottomNavItem(val title: String, val icon: ImageVector) {
     Meal("Meal", Icons.Default.Restaurant),
     Sleep("Sleep", Icons.Default.Bedtime)
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TopBarWithBack(title: String, onBack: () -> Unit) {
+    TopAppBar(
+        title = { Text(title) },
+        navigationIcon = {
+            IconButton(onClick = { onBack() }) {
+                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.White,
+            titleContentColor = Color.Black,
+            navigationIconContentColor = Color.Black
+        )
+    )
+}
+
